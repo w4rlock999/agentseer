@@ -1,0 +1,75 @@
+.generic-llm-node {
+  background: #ffffff;
+  border: 2px solid #0050ff;
+  border-radius: 12px;
+  padding: 14px 12px 12px 12px;
+  min-width: 220px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  text-align: left;
+}
+
+.generic-llm-node-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.generic-llm-node-icon {
+  width: 20px;
+  height: 20px;
+  background: #000cff;
+  border-radius: 4px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.generic-llm-node-title {
+  font-weight: bold;
+  font-size: 1.15rem;
+}
+
+.generic-llm-node-row {
+  background: #f3f3f3;
+  border-radius: 6px;
+  padding: 3px 3px;
+  margin-bottom: 7px;
+  font-size: 0.70rem;
+}
+
+.generic-llm-node-row.asr {
+  font-weight: 500;
+  margin-bottom: 0;
+}
+
+.generic-llm-node-row.asr-blue {
+  background: #5ef3ff;
+  color: #222;
+}
+
+.generic-llm-node-row.asr-yellow {
+  background: #ffe066;
+  color: #222;
+}
+
+.generic-llm-node-row.asr-red {
+  background: #ff6b6b;
+  color: #fff;
+}
+
+.generic-llm-node strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.generic-llm-node p {
+  margin: 5px 0;
+}
+
+.selected {
+  box-shadow: 0px 4px 16.7px rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+}
+
+.selected .generic-llm-node {
+  border: 3px solid orange;
+} 

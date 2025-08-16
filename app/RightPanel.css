@@ -1,0 +1,172 @@
+.right-panel {
+  width: 300px;
+  min-width: 180px;
+  max-width: 600px;
+  height: 100%;
+  background: #fff;
+  border: 2px solid #0000ff;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-y: auto;
+  resize: horizontal;
+  /* For draggable resizing */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.right-panel h3 {
+  margin-top: 0;
+}
+
+.right-panel-drag-handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  cursor: ew-resize;
+  z-index: 10;
+  background: transparent;
+}
+
+.rp-header {
+  background: #0000ff;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 18px 0 12px 0;
+  margin-bottom: 0;
+}
+
+.rp-section {
+  padding: 18px 16px 0 16px;
+  display: flex;
+  flex-direction: column;
+  font-size: 0.8rem;
+}
+
+.rp-label {
+  color: #0000ff;
+  font-weight: 500;
+  margin-top: 8px;
+  margin-bottom: 2px;
+  font-size: 0.8rem;
+}
+
+.rp-value {
+  color: #0000ff;
+  margin-bottom: 2px;
+  font-size: 0.8rem;
+}
+
+.rp-box {
+  border: 2px solid #0000ff;
+  border-radius: 2px;
+  background: #f5f5f5;
+  min-height: 80px;
+  margin-bottom: 8px;
+  margin-top: 2px;
+  padding: 8px;
+  color: #222;
+  font-size: 0.8rem;
+  box-sizing: border-box;
+}
+ 
+.rp-arrow {
+  color: #0000ff;
+  text-align: center;
+  font-size: 0.8rem;
+  margin: 0 0 8px 0;
+}
+
+.rp-component-item {
+  padding: 6px 10px;
+  margin: 4px 0;
+  background-color: white;
+  border: 1px solid #0000ff;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rp-component-type {
+  font-weight: 500;
+  color: #0000ff;
+  text-transform: capitalize;
+  min-width: 60px;
+}
+
+.rp-component-name {
+  color: #0000ff;
+  flex: 1;
+  word-break: break-word;
+  font-size: 0.8rem;
+  background-color: #f0f0ff;
+  padding: 2px 6px;
+  border-radius: 2px;
+  margin-left: 4px;
+}
+
+.rp-message-item {
+  margin: 8px 0;
+  padding: 8px;
+  border: 1px solid #0000ff;
+  border-radius: 2px;
+  background-color: white;
+}
+
+.rp-message-type {
+  font-weight: bold;
+  color: #0000ff;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.rp-message-content {
+  color: #333;
+  font-size: 0.8rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin: 4px 0;
+}
+
+.rp-tool-calls {
+  margin-top: 8px;
+}
+
+.rp-tool-call {
+  margin: 4px 0;
+  padding: 4px 8px;
+  background-color: #f0f0ff;
+  border-radius: 2px;
+}
+
+.rp-tool-name {
+  color: #0000ff;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.rp-tool-args {
+  margin: 4px 0 0 0;
+  padding: 4px;
+  background-color: #f8f8ff;
+  border-radius: 2px;
+  font-size: 0.8rem;
+  overflow-x: auto;
+}
+
+.rp-components-section {
+  margin: 8px 0;
+}
+
+.rp-components-header {
+  color: #0000ff;
+  font-weight: 500;
+  font-size: 0.8rem;
+  margin-bottom: 4px;
+}
