@@ -31,7 +31,8 @@
             "tool_description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query."
           }
         ],
-        "risk": 0.0972222222222222
+        "risk": 0.0972222222222222,
+        "model": "gpt-4o-mini"
       },
       {
         "label": "agent_1",
@@ -67,7 +68,8 @@
             "tool_description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query."
           }
         ],
-        "risk": 0.0486111111111111
+        "risk": 0.0486111111111111,
+        "model": "gpt-4o-mini"
       },
       {
         "label": "agent_2",
@@ -83,7 +85,8 @@
             "tool_description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query."
           }
         ],
-        "risk": 0.1161616161616161
+        "risk": 0.1161616161616161,
+        "model": "gpt-4o-mini"
       },
       {
         "label": "agent_3",
@@ -99,7 +102,8 @@
             "tool_description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query."
           }
         ],
-        "risk": 0.1628787878787878
+        "risk": 0.1628787878787878,
+        "model": "gpt-4o-mini"
       },
       {
         "label": "agent_4",
@@ -115,7 +119,8 @@
             "tool_description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query."
           }
         ],
-        "risk": 0.1647727272727272
+        "risk": 0.1647727272727272,
+        "model": "gpt-4o-mini"
       },
       {
         "label": "agent_5",
@@ -135,7 +140,8 @@
             "tool_description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query."
           }
         ],
-        "risk": 0.1893939393939394
+        "risk": 0.1893939393939394,
+        "model": "gpt-4o-mini"
       }
     ],
     "tools": [

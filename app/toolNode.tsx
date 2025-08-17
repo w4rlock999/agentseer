@@ -20,7 +20,7 @@ const getRiskClass = (risk: number) => {
 };
 
 const ToolNode = ({ data, isHighlighted }: ToolNodeProps) => {
-  const riskValue = data.risk !== undefined ? Number(data.risk).toFixed(2) : 'N/A';
+  const riskValue = data.risk !== undefined ? Number(data.risk).toFixed(3) : 'N/A';
   const riskClass = data.risk !== undefined ? getRiskClass(data.risk) : '';
 
   return (

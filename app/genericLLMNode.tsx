@@ -13,6 +13,7 @@ interface GenericLLMNodeData {
 interface GenericLLMNodeProps {
   data: GenericLLMNodeData;
   isConnectable: boolean;
+  isHighlighted?: boolean;
 }
 
 const getAsrClass = (asr: number) => {
@@ -21,7 +22,7 @@ const getAsrClass = (asr: number) => {
   return 'asr-red';
 };
 
-const GenericLLMNode = ({ data, isConnectable }: GenericLLMNodeProps) => {
+const GenericLLMNode = ({ data, isConnectable, isHighlighted }: GenericLLMNodeProps) => {
   const asrValue = (data.average_jailbreak_ASR * 100).toFixed(2);
   const asrClass = getAsrClass(data.average_jailbreak_ASR);
   return (
@@ -31,7 +32,7 @@ const GenericLLMNode = ({ data, isConnectable }: GenericLLMNodeProps) => {
         position={Position.Top}
         isConnectable={isConnectable}
       />
-      <div className="generic-llm-node">
+      <div className={`generic-llm-node ${isHighlighted ? 'highlighted' : ''}`}>
         <div className="generic-llm-node-header">
           <div className="generic-llm-node-icon" />
           <span className="generic-llm-node-title">{data.label.toUpperCase()}</span>

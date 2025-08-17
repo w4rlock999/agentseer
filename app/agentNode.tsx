@@ -22,7 +22,7 @@ const getRiskClass = (risk: number) => {
 };
 
 const AgentNode = ({ data, isConnectable, isHighlighted }: AgentNodeProps) => {
-  const riskValue = data.risk !== undefined ? Number(data.risk).toFixed(2) : 'N/A';
+  const riskValue = data.risk !== undefined ? Number(data.risk).toFixed(3) : 'N/A';
   const riskClass = data.risk !== undefined ? getRiskClass(data.risk) : '';
   
   return (

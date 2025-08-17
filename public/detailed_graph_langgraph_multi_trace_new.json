@@ -1,0 +1,372 @@
+{
+  "components": {
+    "agents": [
+      {
+        "label": "agent_0",
+        "name": "main_agent",
+        "system_prompt": "\n    You are a helpful assistant that can answer questions and help with tasks. \n    Always try write output in a nice markdown format. \n\n    Your name is \"Shopify Admin Agent\", an ai agent that is a helpful shopify admin assistant with the ability to search the web and use other tools such as querying admin data from shopify.\n\n    IMPORTANT: When a user asks about product performance, sales data, or anything related to business metrics, you MUST use the available tools to get accurate information. Do not make up data or estimates. Always use the tools when appropriate.\n\n    Examples of when to use tools:\n    - User asks: \"make final report for the year 2024?\" \u2192 handoff to final report agent\n    - User asks: \"What was our top product in January 2024?\" \u2192 Use get_top_product_in_month_year with \"2024-01\"\n    - User asks: \"Show me the best selling item last month\" \u2192 Use get_top_product_in_month_year with the appropriate month\n    - User asks: \"Which product performed best in Q1?\" \u2192 Use get_top_product_in_month_year for each month in Q1\n\n    When you use a tool, explain what you're doing to the user and then provide the results in a clear, helpful format.\n\n    When user request for a final report, you will know to delegate the work to the final report agent.\n    Check the chat history so far, when you see in the chat history that the final report agent already return you the requested final report and you have not present it to the user, you MUST present it to the user if you haven't!\n    \n    After receiving a report from the final report agent, the assistant (you) must always present that report to the user without exception.\n    YOU FAIL YOUR TASK IF AFTER RECEIVING THE FINAL REPORT YOU ONLY SAY \"FINAL REPORT IS ALREADY SUCCESSFULLY PREPARED AND HANDED OFF\"\n    \n    To code properly, you will need to understand the structure of the order data, where each order has the following structure:\n    If you see error when running the python code indicating that the structure of the data is different than your thought, try to run a code to understand the structure first by picking two first entry of the data. NEVER OUTPUT THE WHOLE FILE.\n    \n    The data is structured as an array of objects, where each object contains a node key representing an order. Here\u2019s how to access various elements:\n\n    Order ID and Name\n\n    ID: order['node']['id']\n    Name: order['node']['name']\n    Processed Date\n\n    Processed At: order['node']['processedAt']\n    Total Price\n\n    Amount: order['node']['totalPriceSet']['shopMoney']['amount']\n    Currency Code: order['node']['totalPriceSet']['shopMoney']['currencyCode']\n    Customer Information\n\n    First Name: order['node']['customer']['firstName']\n    Last Name: order['node']['customer']['lastName']\n    Email: order['node']['customer']['email']\n    Line Items\n\n    Line Items Array: order['node']['lineItems']['edges']\n    To access each line item:\n    Title: line_item['node']['title']\n    Quantity: line_item['node']['quantity']\n    Variant ID: line_item['node']['variant']['id']\n    Variant Title: line_item['node']['variant']['title']\n\n\n    Here is the chat history so far:\n    ",
+        "tools": [
+          {
+            "tool_name": "save_to_knowledge_base_LTM_tool",
+            "tool_description": "Tool to save a memory entry to the knowledge base long-term memory (LTM)."
+          },
+          {
+            "tool_name": "get_information_from_knowledge_base",
+            "tool_description": "get info using semantic information retrieval from the knowledge base vector database"
+          },
+          {
+            "tool_name": "get_order_data_for_period",
+            "tool_description": "Get order data from Shopify Admin API, in a period of time, and save to file name in JSON format.\nstart_date and end_date are string in the format of YYYY-MM-DD.\nsave_to_filename should be a string with format [start_date]_to_[end_date]_order.json\nsave file will be saved in the './runtime_data' directory."
+          },
+          {
+            "tool_name": "transfer_to_final_report_agent_node",
+            "tool_description": "Assign task to a final report agent."
+          },
+          {
+            "tool_name": "run_python_code",
+            "tool_description": "Run python code, the code is a string of python code, and it will be executed in the current working directory.\nAlways print the relevant information with explicity print() statement for any of the result in interest or any error for you to revise the code."
+          },
+          {
+            "tool_name": "tavily_search",
+            "tool_description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query."
+          }
+        ],
+        "model": "gpt-4o-mini-2024-07-18"
+      }
+    ],
+    "tools": [
+      {
+        "label": "tool_0",
+        "name": "save_to_knowledge_base_LTM_tool",
+        "description": "Tool to save a memory entry to the knowledge base long-term memory (LTM)."
+      },
+      {
+        "label": "tool_1",
+        "name": "get_information_from_knowledge_base",
+        "description": "get info using semantic information retrieval from the knowledge base vector database"
+      },
+      {
+        "label": "tool_2",
+        "name": "get_order_data_for_period",
+        "description": "Get order data from Shopify Admin API, in a period of time, and save to file name in JSON format.\nstart_date and end_date are string in the format of YYYY-MM-DD.\nsave_to_filename should be a string with format [start_date]_to_[end_date]_order.json\nsave file will be saved in the './runtime_data' directory."
+      },
+      {
+        "label": "tool_3",
+        "name": "transfer_to_final_report_agent_node",
+        "description": "Assign task to a final report agent."
+      },
+      {
+        "label": "tool_4",
+        "name": "run_python_code",
+        "description": "Run python code, the code is a string of python code, and it will be executed in the current working directory.\nAlways print the relevant information with explicity print() statement for any of the result in interest or any error for you to revise the code."
+      },
+      {
+        "label": "tool_5",
+        "name": "tavily_search",
+        "description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query."
+      }
+    ],
+    "short_term_memory": [
+      {
+        "label": "short_term_memory_0",
+        "agent": "main_agent",
+        "short_term_memory": "main_agent_messages"
+      }
+    ],
+    "long_term_memory": [
+      {
+        "label": "long_term_memory_0",
+        "long_term_memory": "knowledge_base_long_term_memory"
+      }
+    ]
+  },
+  "actions": [
+    [
+      {
+        "label": "human_input_0",
+        "time": "2025-08-17_11-03-04.723",
+        "input": "first"
+      },
+      {
+        "label": "action_0",
+        "input": [
+          {
+            "content": "\n    You are a helpful assistant that can answer questions and help with tasks. \n    Always try write output in a nice markdown format. \n\n    Your name is \"Shopify Admin Agent\", an ai agent that is a helpful shopify admin assistant with the ability to search the web and use other tools such as querying admin data from shopify.\n\n    IMPORTANT: When a user asks about product performance, sales data, or anything related to business metrics, you MUST use the available tools to get accurate information. Do not make up data or estimates. Always use the tools when appropriate.\n\n    Examples of when to use tools:\n    - User asks: \"make final report for the year 2024?\" \u2192 handoff to final report agent\n    - User asks: \"What was our top product in January 2024?\" \u2192 Use get_top_product_in_month_year with \"2024-01\"\n    - User asks: \"Show me the best selling item last month\" \u2192 Use get_top_product_in_month_year with the appropriate month\n    - User asks: \"Which product performed best in Q1?\" \u2192 Use get_top_product_in_month_year for each month in Q1\n\n    When you use a tool, explain what you're doing to the user and then provide the results in a clear, helpful format.\n\n    When user request for a final report, you will know to delegate the work to the final report agent.\n    Check the chat history so far, when you see in the chat history that the final report agent already return you the requested final report and you have not present it to the user, you MUST present it to the user if you haven't!\n    \n    After receiving a report from the final report agent, the assistant (you) must always present that report to the user without exception.\n    YOU FAIL YOUR TASK IF AFTER RECEIVING THE FINAL REPORT YOU ONLY SAY \"FINAL REPORT IS ALREADY SUCCESSFULLY PREPARED AND HANDED OFF\"\n    \n    To code properly, you will need to understand the structure of the order data, where each order has the following structure:\n    If you see error when running the python code indicating that the structure of the data is different than your thought, try to run a code to understand the structure first by picking two first entry of the data. NEVER OUTPUT THE WHOLE FILE.\n    \n    The data is structured as an array of objects, where each object contains a node key representing an order. Here\u2019s how to access various elements:\n\n    Order ID and Name\n\n    ID: order['node']['id']\n    Name: order['node']['name']\n    Processed Date\n\n    Processed At: order['node']['processedAt']\n    Total Price\n\n    Amount: order['node']['totalPriceSet']['shopMoney']['amount']\n    Currency Code: order['node']['totalPriceSet']['shopMoney']['currencyCode']\n    Customer Information\n\n    First Name: order['node']['customer']['firstName']\n    Last Name: order['node']['customer']['lastName']\n    Email: order['node']['customer']['email']\n    Line Items\n\n    Line Items Array: order['node']['lineItems']['edges']\n    To access each line item:\n    Title: line_item['node']['title']\n    Quantity: line_item['node']['quantity']\n    Variant ID: line_item['node']['variant']['id']\n    Variant Title: line_item['node']['variant']['title']\n\n\n    Here is the chat history so far:\n    ",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "first",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "b31b2215-767a-43d1-b22a-7b8d00a8300d",
+            "example": false
+          }
+        ],
+        "output": {
+          "generations": [
+            [
+              {
+                "text": "Hello! How can I assist you today? If you have any questions or tasks related to your Shopify store, feel free to ask!",
+                "generation_info": {
+                  "finish_reason": "stop",
+                  "logprobs": null
+                },
+                "type": "ChatGeneration",
+                "message": {
+                  "content": "Hello! How can I assist you today? If you have any questions or tasks related to your Shopify store, feel free to ask!",
+                  "additional_kwargs": {
+                    "refusal": null
+                  },
+                  "response_metadata": {
+                    "token_usage": {
+                      "completion_tokens": 28,
+                      "prompt_tokens": 2016,
+                      "total_tokens": 2044,
+                      "completion_tokens_details": {
+                        "accepted_prediction_tokens": 0,
+                        "audio_tokens": 0,
+                        "reasoning_tokens": 0,
+                        "rejected_prediction_tokens": 0
+                      },
+                      "prompt_tokens_details": {
+                        "audio_tokens": 0,
+                        "cached_tokens": 0
+                      }
+                    },
+                    "model_name": "gpt-4o-mini-2024-07-18",
+                    "system_fingerprint": "fp_560af6e559",
+                    "id": "chatcmpl-C5UW2LPnVPW8if0IRmYukMkfGCd5b",
+                    "service_tier": "default",
+                    "finish_reason": "stop",
+                    "logprobs": null
+                  },
+                  "type": "ai",
+                  "name": null,
+                  "id": "run--fe802d06-c36f-42d8-aaeb-2af30951efe6-0"
+                }
+              }
+            ]
+          ],
+          "llm_output": {
+            "token_usage": {
+              "completion_tokens": 28,
+              "prompt_tokens": 2016,
+              "total_tokens": 2044,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 0
+              }
+            },
+            "model_name": "gpt-4o-mini-2024-07-18",
+            "system_fingerprint": "fp_560af6e559",
+            "id": "chatcmpl-C5UW2LPnVPW8if0IRmYukMkfGCd5b",
+            "service_tier": "default"
+          },
+          "run": null,
+          "type": "LLMResult"
+        },
+        "span_id": "oI2TyNH6MLM=",
+        "agent_label": "agent_0",
+        "agent_name": "main_agent",
+        "model": "gpt-4o-mini-2024-07-18",
+        "components_in_input": [
+          "short_term_memory_0"
+        ],
+        "components_in_output": [
+          "short_term_memory_0"
+        ]
+      }
+    ],
+    [
+      {
+        "label": "human_input_1",
+        "time": "2025-08-17_11-03-04.724",
+        "input": "second"
+      },
+      {
+        "label": "action_1",
+        "input": [
+          {
+            "content": "\n    You are a helpful assistant that can answer questions and help with tasks. \n    Always try write output in a nice markdown format. \n\n    Your name is \"Shopify Admin Agent\", an ai agent that is a helpful shopify admin assistant with the ability to search the web and use other tools such as querying admin data from shopify.\n\n    IMPORTANT: When a user asks about product performance, sales data, or anything related to business metrics, you MUST use the available tools to get accurate information. Do not make up data or estimates. Always use the tools when appropriate.\n\n    Examples of when to use tools:\n    - User asks: \"make final report for the year 2024?\" \u2192 handoff to final report agent\n    - User asks: \"What was our top product in January 2024?\" \u2192 Use get_top_product_in_month_year with \"2024-01\"\n    - User asks: \"Show me the best selling item last month\" \u2192 Use get_top_product_in_month_year with the appropriate month\n    - User asks: \"Which product performed best in Q1?\" \u2192 Use get_top_product_in_month_year for each month in Q1\n\n    When you use a tool, explain what you're doing to the user and then provide the results in a clear, helpful format.\n\n    When user request for a final report, you will know to delegate the work to the final report agent.\n    Check the chat history so far, when you see in the chat history that the final report agent already return you the requested final report and you have not present it to the user, you MUST present it to the user if you haven't!\n    \n    After receiving a report from the final report agent, the assistant (you) must always present that report to the user without exception.\n    YOU FAIL YOUR TASK IF AFTER RECEIVING THE FINAL REPORT YOU ONLY SAY \"FINAL REPORT IS ALREADY SUCCESSFULLY PREPARED AND HANDED OFF\"\n    \n    To code properly, you will need to understand the structure of the order data, where each order has the following structure:\n    If you see error when running the python code indicating that the structure of the data is different than your thought, try to run a code to understand the structure first by picking two first entry of the data. NEVER OUTPUT THE WHOLE FILE.\n    \n    The data is structured as an array of objects, where each object contains a node key representing an order. Here\u2019s how to access various elements:\n\n    Order ID and Name\n\n    ID: order['node']['id']\n    Name: order['node']['name']\n    Processed Date\n\n    Processed At: order['node']['processedAt']\n    Total Price\n\n    Amount: order['node']['totalPriceSet']['shopMoney']['amount']\n    Currency Code: order['node']['totalPriceSet']['shopMoney']['currencyCode']\n    Customer Information\n\n    First Name: order['node']['customer']['firstName']\n    Last Name: order['node']['customer']['lastName']\n    Email: order['node']['customer']['email']\n    Line Items\n\n    Line Items Array: order['node']['lineItems']['edges']\n    To access each line item:\n    Title: line_item['node']['title']\n    Quantity: line_item['node']['quantity']\n    Variant ID: line_item['node']['variant']['id']\n    Variant Title: line_item['node']['variant']['title']\n\n\n    Here is the chat history so far:\n    ",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "system",
+            "name": null,
+            "id": null
+          },
+          {
+            "content": "first",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "b31b2215-767a-43d1-b22a-7b8d00a8300d",
+            "example": false
+          },
+          {
+            "content": "Hello! How can I assist you today? If you have any questions or tasks related to your Shopify store, feel free to ask!",
+            "additional_kwargs": {
+              "refusal": null
+            },
+            "response_metadata": {
+              "token_usage": {
+                "completion_tokens": 28,
+                "prompt_tokens": 2016,
+                "total_tokens": 2044,
+                "completion_tokens_details": {
+                  "accepted_prediction_tokens": 0,
+                  "audio_tokens": 0,
+                  "reasoning_tokens": 0,
+                  "rejected_prediction_tokens": 0
+                },
+                "prompt_tokens_details": {
+                  "audio_tokens": 0,
+                  "cached_tokens": 0
+                }
+              },
+              "model_name": "gpt-4o-mini-2024-07-18",
+              "system_fingerprint": "fp_560af6e559",
+              "id": "chatcmpl-C5UW2LPnVPW8if0IRmYukMkfGCd5b",
+              "service_tier": "default",
+              "finish_reason": "stop",
+              "logprobs": null
+            },
+            "type": "ai",
+            "name": null,
+            "id": "run--fe802d06-c36f-42d8-aaeb-2af30951efe6-0",
+            "example": false,
+            "tool_calls": [],
+            "invalid_tool_calls": [],
+            "usage_metadata": {
+              "input_tokens": 2016,
+              "output_tokens": 28,
+              "total_tokens": 2044,
+              "input_token_details": {
+                "audio": 0,
+                "cache_read": 0
+              },
+              "output_token_details": {
+                "audio": 0,
+                "reasoning": 0
+              }
+            }
+          },
+          {
+            "content": "second",
+            "additional_kwargs": {},
+            "response_metadata": {},
+            "type": "human",
+            "name": null,
+            "id": "957878c6-34f6-4f99-9892-5e5d3e1b4b07",
+            "example": false
+          }
+        ],
+        "output": {
+          "generations": [
+            [
+              {
+                "text": "It seems like you're counting or referencing something specific. Could you please provide more details or clarify what you need assistance with? I'm here to help!",
+                "generation_info": {
+                  "finish_reason": "stop",
+                  "logprobs": null
+                },
+                "type": "ChatGeneration",
+                "message": {
+                  "content": "It seems like you're counting or referencing something specific. Could you please provide more details or clarify what you need assistance with? I'm here to help!",
+                  "additional_kwargs": {
+                    "refusal": null
+                  },
+                  "response_metadata": {
+                    "token_usage": {
+                      "completion_tokens": 30,
+                      "prompt_tokens": 2052,
+                      "total_tokens": 2082,
+                      "completion_tokens_details": {
+                        "accepted_prediction_tokens": 0,
+                        "audio_tokens": 0,
+                        "reasoning_tokens": 0,
+                        "rejected_prediction_tokens": 0
+                      },
+                      "prompt_tokens_details": {
+                        "audio_tokens": 0,
+                        "cached_tokens": 1920
+                      }
+                    },
+                    "model_name": "gpt-4o-mini-2024-07-18",
+                    "system_fingerprint": "fp_560af6e559",
+                    "id": "chatcmpl-C5UW4VsofWlHaofYh0ZSyN5y8MStj",
+                    "service_tier": "default",
+                    "finish_reason": "stop",
+                    "logprobs": null
+                  },
+                  "type": "ai",
+                  "name": null,
+                  "id": "run--b75125bd-05c9-4508-9190-32269ade8697-0"
+                }
+              }
+            ]
+          ],
+          "llm_output": {
+            "token_usage": {
+              "completion_tokens": 30,
+              "prompt_tokens": 2052,
+              "total_tokens": 2082,
+              "completion_tokens_details": {
+                "accepted_prediction_tokens": 0,
+                "audio_tokens": 0,
+                "reasoning_tokens": 0,
+                "rejected_prediction_tokens": 0
+              },
+              "prompt_tokens_details": {
+                "audio_tokens": 0,
+                "cached_tokens": 1920
+              }
+            },
+            "model_name": "gpt-4o-mini-2024-07-18",
+            "system_fingerprint": "fp_560af6e559",
+            "id": "chatcmpl-C5UW4VsofWlHaofYh0ZSyN5y8MStj",
+            "service_tier": "default"
+          },
+          "run": null,
+          "type": "LLMResult"
+        },
+        "span_id": "E3x0XWKvCII=",
+        "agent_label": "agent_0",
+        "agent_name": "main_agent",
+        "model": "gpt-4o-mini-2024-07-18",
+        "components_in_input": [
+          "short_term_memory_0"
+        ],
+        "components_in_output": [
+          "short_term_memory_0"
+        ]
+      }
+    ]
+  ],
+  "actions_edge": [
+    [
+      {
+        "source": "human_input_0",
+        "target": "action_0"
+      }
+    ],
+    [
+      {
+        "source": "human_input_1",
+        "target": "action_1"
+      }
+    ]
+  ]
+}

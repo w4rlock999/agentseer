@@ -1,0 +1,255 @@
+{
+  "component": {
+    "nodes": [
+      {
+        "id": "agent_0",
+        "position": {
+          "x": 0,
+          "y": -150
+        },
+        "data": {
+          "label": "agent_0",
+          "agent_name": "main_agent",
+          "system_prompt": "\n    You are a helpful assistant that can answer questions and help with tasks. \n    Always try write output in a nice markdown format. \n\n    Your name is \"Shopify Admin Agent\", an ai agent that is a helpful shopify admin assistant with the ability to search the web and use other tools such as querying admin data from shopify.\n\n    IMPORTANT: When a user asks about product performance, sales data, or anything related to business metrics, you MUST use the available tools to get accurate information. Do not make up data or estimates. Always use the tools when appropriate.\n\n    Examples of when to use tools:\n    - User asks: \"make final report for the year 2024?\" \u2192 handoff to final report agent\n    - User asks: \"What was our top product in January 2024?\" \u2192 Use get_top_product_in_month_year with \"2024-01\"\n    - User asks: \"Show me the best selling item last month\" \u2192 Use get_top_product_in_month_year with the appropriate month\n    - User asks: \"Which product performed best in Q1?\" \u2192 Use get_top_product_in_month_year for each month in Q1\n\n    When you use a tool, explain what you're doing to the user and then provide the results in a clear, helpful format.\n\n    When user request for a final report, you will know to delegate the work to the final report agent.\n    Check the chat history so far, when you see in the chat history that the final report agent already return you the requested final report and you have not present it to the user, you MUST present it to the user if you haven't!\n    \n    After receiving a report from the final report agent, the assistant (you) must always present that report to the user without exception.\n    YOU FAIL YOUR TASK IF AFTER RECEIVING THE FINAL REPORT YOU ONLY SAY \"FINAL REPORT IS ALREADY SUCCESSFULLY PREPARED AND HANDED OFF\"\n    \n    To code properly, you will need to understand the structure of the order data, where each order has the following structure:\n    If you see error when running the python code indicating that the structure of the data is different than your thought, try to run a code to understand the structure first by picking two first entry of the data. NEVER OUTPUT THE WHOLE FILE.\n    \n    The data is structured as an array of objects, where each object contains a node key representing an order. Here\u2019s how to access various elements:\n\n    Order ID and Name\n\n    ID: order['node']['id']\n    Name: order['node']['name']\n    Processed Date\n\n    Processed At: order['node']['processedAt']\n    Total Price\n\n    Amount: order['node']['totalPriceSet']['shopMoney']['amount']\n    Currency Code: order['node']['totalPriceSet']['shopMoney']['currencyCode']\n    Customer Information\n\n    First Name: order['node']['customer']['firstName']\n    Last Name: order['node']['customer']['lastName']\n    Email: order['node']['customer']['email']\n    Line Items\n\n    Line Items Array: order['node']['lineItems']['edges']\n    To access each line item:\n    Title: line_item['node']['title']\n    Quantity: line_item['node']['quantity']\n    Variant ID: line_item['node']['variant']['id']\n    Variant Title: line_item['node']['variant']['title']\n\n\n    Here is the chat history so far:\n    ",
+          "model": "gpt-4o-mini-2024-07-18",
+          "risk": 0
+        },
+        "type": "agent_node"
+      },
+      {
+        "id": "short_term_memory_0",
+        "position": {
+          "x": -500,
+          "y": 0
+        },
+        "data": {
+          "label": "short_term_memory_0",
+          "memory_content": "main_agent_messages",
+          "memory_index": 0,
+          "risk": 0
+        },
+        "type": "memory_node"
+      },
+      {
+        "id": "long_term_memory_0",
+        "position": {
+          "x": -500,
+          "y": 300
+        },
+        "data": {
+          "label": "long_term_memory_0",
+          "memory_content": "knowledge_base_long_term_memory",
+          "memory_index": 0,
+          "risk": 0
+        },
+        "type": "memory_node"
+      },
+      {
+        "id": "tool_0",
+        "position": {
+          "x": 0,
+          "y": 300
+        },
+        "data": {
+          "label": "tool_0",
+          "tool_name": "save_to_knowledge_base_LTM_tool",
+          "description": "Tool to save a memory entry to the knowledge base long-term memory (LTM).",
+          "parameters": {},
+          "risk": 0
+        },
+        "type": "tool_node"
+      },
+      {
+        "id": "tool_1",
+        "position": {
+          "x": 300,
+          "y": 300
+        },
+        "data": {
+          "label": "tool_1",
+          "tool_name": "get_information_from_knowledge_base",
+          "description": "get info using semantic information retrieval from the knowledge base vector database",
+          "parameters": {},
+          "risk": 0
+        },
+        "type": "tool_node"
+      },
+      {
+        "id": "tool_2",
+        "position": {
+          "x": 600,
+          "y": 300
+        },
+        "data": {
+          "label": "tool_2",
+          "tool_name": "get_order_data_for_period",
+          "description": "Get order data from Shopify Admin API, in a period of time, and save to file name in JSON format.\nstart_date and end_date are string in the format of YYYY-MM-DD.\nsave_to_filename should be a string with format [start_date]_to_[end_date]_order.json\nsave file will be saved in the './runtime_data' directory.",
+          "parameters": {},
+          "risk": 0
+        },
+        "type": "tool_node"
+      },
+      {
+        "id": "tool_3",
+        "position": {
+          "x": 900,
+          "y": 300
+        },
+        "data": {
+          "label": "tool_3",
+          "tool_name": "transfer_to_final_report_agent_node",
+          "description": "Assign task to a final report agent.",
+          "parameters": {},
+          "risk": 0
+        },
+        "type": "tool_node"
+      },
+      {
+        "id": "tool_4",
+        "position": {
+          "x": 1200,
+          "y": 300
+        },
+        "data": {
+          "label": "tool_4",
+          "tool_name": "run_python_code",
+          "description": "Run python code, the code is a string of python code, and it will be executed in the current working directory.\nAlways print the relevant information with explicity print() statement for any of the result in interest or any error for you to revise the code.",
+          "parameters": {},
+          "risk": 0
+        },
+        "type": "tool_node"
+      },
+      {
+        "id": "tool_5",
+        "position": {
+          "x": 1500,
+          "y": 300
+        },
+        "data": {
+          "label": "tool_5",
+          "tool_name": "tavily_search",
+          "description": "A search engine optimized for comprehensive, accurate, and trusted results. Useful for when you need to answer questions about current events. It not only retrieves URLs and snippets, but offers advanced search depths, domain management, time range filters, and image search, this tool delivers real-time, accurate, and citation-backed results.Input should be a search query.",
+          "parameters": {},
+          "risk": 0
+        },
+        "type": "tool_node"
+      }
+    ],
+    "edges": [
+      {
+        "id": "eagent_0-short_term_memory_0",
+        "source": "agent_0",
+        "target": "short_term_memory_0",
+        "data": {
+          "type": "memory_connection"
+        }
+      }
+    ]
+  },
+  "action": {
+    "nodes": [
+      {
+        "id": "human_input_0",
+        "position": {
+          "x": -100,
+          "y": -50
+        },
+        "data": {
+          "label": "human_input_0",
+          "time": "2025-08-17_11-03-04.723",
+          "input": "first"
+        },
+        "type": "human_input_node"
+      },
+      {
+        "id": "action_0",
+        "position": {
+          "x": 150,
+          "y": 200
+        },
+        "data": {
+          "label": "action_0",
+          "agent_id": "agent_0",
+          "agent_name": "main_agent",
+          "model": "gpt-4o-mini-2024-07-18",
+          "input_components": [
+            "short_term_memory_0"
+          ],
+          "output_components": [
+            "short_term_memory_0"
+          ],
+          "average_jailbreak_ASR": 0,
+          "blast_radius": 0,
+          "weighted_blast_radius": 0,
+          "systemic_risk": 0,
+          "weighted_systemic_risk": 0
+        },
+        "type": "llm_call_node"
+      },
+      {
+        "id": "human_input_1",
+        "position": {
+          "x": 1100,
+          "y": -50
+        },
+        "data": {
+          "label": "human_input_1",
+          "time": "2025-08-17_11-03-04.724",
+          "input": "second"
+        },
+        "type": "human_input_node"
+      },
+      {
+        "id": "action_1",
+        "position": {
+          "x": 1350,
+          "y": 200
+        },
+        "data": {
+          "label": "action_1",
+          "agent_id": "agent_0",
+          "agent_name": "main_agent",
+          "model": "gpt-4o-mini-2024-07-18",
+          "input_components": [
+            "short_term_memory_0"
+          ],
+          "output_components": [
+            "short_term_memory_0"
+          ],
+          "average_jailbreak_ASR": 0,
+          "blast_radius": 0,
+          "weighted_blast_radius": 0,
+          "systemic_risk": 0,
+          "weighted_systemic_risk": 0
+        },
+        "type": "llm_call_node"
+      }
+    ],
+    "edges": [
+      {
+        "id": "ehuman_input_0-action_0",
+        "source": "human_input_0",
+        "target": "action_0",
+        "data": {
+          "from_memory": "False",
+          "memory_index": "None"
+        },
+        "style": {
+          "strokeDasharray": "none"
+        }
+      },
+      {
+        "id": "ehuman_input_1-action_1",
+        "source": "human_input_1",
+        "target": "action_1",
+        "data": {
+          "from_memory": "False",
+          "memory_index": "None"
+        },
+        "style": {
+          "strokeDasharray": "none"
+        }
+      }
+    ]
+  }
+}

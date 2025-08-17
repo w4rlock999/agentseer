@@ -8,7 +8,7 @@ interface HumanInputNodeData {
   input: string;
 }
 
-function HumanInputNode({ data }: { data: HumanInputNodeData }) {
+function HumanInputNode({ data, isHighlighted }: { data: HumanInputNodeData; isHighlighted?: boolean }) {
   // Format timestamp from "YYYY-MM-DD_HH-MM-SS.SSS" to "MMM DD, YYYY HH:MM:SS"
   const formatTimestamp = (timestamp: string) => {
     const [date, time] = timestamp.split('_');
@@ -31,7 +31,7 @@ function HumanInputNode({ data }: { data: HumanInputNodeData }) {
   };
 
   return (
-    <div className="human-input-node">
+    <div className={`human-input-node ${isHighlighted ? 'highlighted' : ''}`}>
       <div className="human-input-node-header">
         <span>Human Input</span>
         <span className="human-input-node-time">{formatTimestamp(data.time)}</span>

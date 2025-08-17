@@ -7,11 +7,23 @@ interface RightPanelProps {
   setWidth: (w: number) => void;
 }
 
+interface ToolCall {
+  name?: string;
+  args?: Record<string, any>;
+  function?: {
+    name: string;
+    arguments: Record<string, any>;
+  };
+}
+
 interface Message {
   content: string;
   type: string;
   name?: string;
-  tool_calls?: any[];
+  tool_calls?: ToolCall[];
+  additional_kwargs?: {
+    tool_calls?: ToolCall[];
+  };
 }
 
 interface ActionInfo {
@@ -29,6 +41,7 @@ interface ActionInfo {
   };
   agent_id: string;
   agent_name: string;
+  model: string;
   input_components: string[];
   output_components: string[];
   average_jailbreak_ASR: number;
@@ -40,8 +53,7 @@ interface ActionInfo {
 
 interface AgentInfo {
   name: string;
-  backstory: string;
-  goal: string;
+  system_prompt: string;
   model: string;
   id: string;
   risk: number;
@@ -72,12 +84,29 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
   const [toolInfo, setToolInfo] = useState<ToolInfo | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [componentMap, setComponentMap] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Helper function to safely render content that might be an object
+  const renderContent = (content: any): React.ReactNode => {
+    if (typeof content === 'string') {
+      return content;
+    }
+    if (content && typeof content === 'object') {
+      // If it's an object, render it as formatted JSON in a pre tag
+      return <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{JSON.stringify(content, null, 2)}</pre>;
+    }
+    return String(content || '');
+  };
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadInfo = async () => {
+      setError(null);
+      setIsLoading(true);
+      
       if (selectedNode?.type === 'llm_call_node') {
         try {
-          // Get graph structure from initial_flow.json
+          // Get graph structure from reactflow_graph_with_multi_trace.json
           const graphResponse = await fetch('/reactflow_graph_with_multi_trace.json');
           const graphData = await graphResponse.json();
           
@@ -105,8 +134,8 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
           }
           setComponentMap(newComponentMap);
 
-          // Get action details from detailed_graph_multi_trace.json
-          const detailsResponse = await fetch('/detailed_graph_multi_trace.json');
+          // Get action details from detailed_graph_langgraph_multi_trace.json
+          const detailsResponse = await fetch('/detailed_graph_langgraph_multi_trace.json');
           const detailsData = await detailsResponse.json();
           
           try {
@@ -123,6 +152,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
                 output: detailedAction?.output || { generations: [] },
                 agent_id: graphAction.data.agent_id,
                 agent_name: graphAction.data.agent_name,
+                model: graphAction.data.model || 'Unknown Model',
                 input_components: graphAction.data.input_components || [],
                 output_components: graphAction.data.output_components || [],
                 average_jailbreak_ASR: graphAction.data.average_jailbreak_ASR || 0,
@@ -142,20 +172,25 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
         } catch (error) {
           console.error('Failed to load action info:', error);
           setActionInfo(null);
+          setError('Failed to load action information. Please try again.');
         }
       } else if (selectedNode?.type === 'agent_node') {
         try {
-          const response = await fetch('/detailed_graph_multi_trace.json');
+          const response = await fetch('/detailed_graph_langgraph_multi_trace.json');
           const data = await response.json();
-          const agent = data.component.nodes.find((a: any) => a.id === selectedNode.id && a.type === 'agent_node');
+          // Get model info from reactflow graph
+          const graphResponse = await fetch('/reactflow_graph_with_multi_trace.json');
+          const graphData = await graphResponse.json();
+          const graphAgent = graphData?.component?.nodes?.find((n: any) => n?.id === selectedNode?.id);
+          
+          const agent = data?.components?.agents?.find((a: any) => a?.label === selectedNode?.id);
           if (agent) {
             setAgentInfo({
-              id: agent.id,
-              name: agent.data.agent_name,
-              backstory: agent.data.backstory,
-              goal: agent.data.goal,
-              model: "gpt-4o-mini",
-              risk: agent.data.risk || 0
+              id: agent.label,
+              name: agent.name,
+              system_prompt: agent.system_prompt,
+              model: graphAgent?.data?.model || 'Unknown Model',
+              risk: agent.risk || 0
             });
           }
           setActionInfo(null);
@@ -164,18 +199,19 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
         } catch (error) {
           console.error('Failed to load agent info:', error);
           setAgentInfo(null);
+          setError('Failed to load agent information. Please try again.');
         }
       } else if (selectedNode?.type === 'memory_node') {
         try {
-          const response = await fetch('/detailed_graph_multi_trace.json');
+          const response = await fetch('/detailed_graph_langgraph_multi_trace.json');
           const data = await response.json();
-          const memory = data.component.nodes.find((m: any) => m.id === selectedNode.id && m.type === 'memory_node');
+          const memory = data?.components?.memories?.find((m: any) => m?.label === selectedNode?.id);
           if (memory) {
             setMemoryInfo({
-              id: memory.id,
-              memory_content: memory.data.memory_content,
-              memory_index: memory.data.memory_index,
-              risk: memory.data.risk || 0
+              id: memory.label,
+              memory_content: memory.value,
+              memory_index: memory.index || 0,
+              risk: memory.risk || 0
             });
           }
           setActionInfo(null);
@@ -184,18 +220,24 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
         } catch (error) {
           console.error('Failed to load memory info:', error);
           setMemoryInfo(null);
+          setError('Failed to load memory information. Please try again.');
         }
       } else if (selectedNode?.type === 'tool_node') {
         try {
-          const response = await fetch('/detailed_graph_multi_trace.json');
+          const response = await fetch('/detailed_graph_langgraph_multi_trace.json');
           const data = await response.json();
-          const tool = data.component.nodes.find((t: any) => t.id === selectedNode.id && t.type === 'tool_node');
+          // First try to find the tool in the agent's tools
+          let tool = null;
+          for (const agent of data?.components?.agents || []) {
+            tool = agent.tools?.find((t: any) => t?.tool_name === selectedNode?.id);
+            if (tool) break;
+          }
           if (tool) {
             setToolInfo({
-              id: tool.id,
-              tool_name: tool.data.tool_name,
-              description: tool.data.description,
-              risk: tool.data.risk || 0
+              id: tool.tool_name,
+              tool_name: tool.tool_name,
+              description: tool.tool_description,
+              risk: tool.risk || 0
             });
           }
           setActionInfo(null);
@@ -204,6 +246,7 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
         } catch (error) {
           console.error('Failed to load tool info:', error);
           setToolInfo(null);
+          setError('Failed to load tool information. Please try again.');
         }
       } else {
         setActionInfo(null);
@@ -211,6 +254,8 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
         setMemoryInfo(null);
         setToolInfo(null);
       }
+      
+      setIsLoading(false);
     };
 
     loadInfo();
@@ -262,23 +307,67 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
       <div className="right-panel-drag-handle" onMouseDown={onMouseDown} role="presentation" />
       <div className="rp-header">{selectedNode ? selectedNode.data.label : ''}</div>
       
-      {actionInfo && (
+      {isLoading ? (
+        <div className="rp-loading">
+          <div className="rp-loading-spinner"></div>
+          Loading component information...
+        </div>
+      ) : error ? (
+        <div className="rp-error">
+          <div className="rp-error-icon">⚠️</div>
+          {error}
+        </div>
+      ) : actionInfo && (
         <>
           <div className="rp-section">
-            <div className="rp-label">Agent Name:</div>
-            <div className="rp-value">{actionInfo.agent_name}</div>
-            <div className="rp-label">Agent ID:</div>
-            <div className="rp-value">{actionInfo.agent_id}</div>
-            <div className="rp-label">Jailbreak Success Rate:</div>
-            <div className="rp-value">{(actionInfo.average_jailbreak_ASR * 100).toFixed(2)}%</div>
-            <div className="rp-label">Blast Radius:</div>
-            <div className="rp-value">{actionInfo.blast_radius}</div>
-            <div className="rp-label">Weighted Blast Radius:</div>
-            <div className="rp-value">{actionInfo.weighted_blast_radius}</div>
-            <div className="rp-label">Systemic Risk:</div>
-            <div className="rp-value">{(actionInfo.systemic_risk * 100).toFixed(2)}%</div>
-            <div className="rp-label">Weighted Systemic Risk:</div>
-            <div className="rp-value">{(actionInfo.weighted_systemic_risk * 100).toFixed(2)}%</div>
+            <div className="rp-header-info">
+              <div className="rp-header-main">
+                <div className="rp-label">Agent Name:</div>
+                <div className="rp-value">{actionInfo.agent_name}</div>
+                <div className="rp-label">Agent ID:</div>
+                <div className="rp-value">{actionInfo.agent_id}</div>
+                <div className="rp-label">Model:</div>
+                <div className="rp-value">{actionInfo.model || 'Unknown Model'}</div>
+              </div>
+            </div>
+
+            <div className="rp-content-box">
+              <div className="rp-content-header">Safety Metrics</div>
+              <div className="rp-content-body">
+                <div className="rp-metrics-grid">
+                  <div className="rp-metric-item">
+                    <div className="rp-metric-label">Jailbreak Success Rate</div>
+                    <div className={`rp-metric-value ${actionInfo.average_jailbreak_ASR > 0.7 ? 'high-risk' : actionInfo.average_jailbreak_ASR > 0.3 ? 'medium-risk' : 'low-risk'}`}>
+                      {Number(actionInfo.average_jailbreak_ASR).toFixed(3)}
+                    </div>
+                  </div>
+                  <div className="rp-metric-item">
+                    <div className="rp-metric-label">Blast Radius</div>
+                    <div className="rp-metric-value">
+                      {Number(actionInfo.blast_radius).toFixed(3)}
+                    </div>
+                  </div>
+                  <div className="rp-metric-item">
+                    <div className="rp-metric-label">Weighted Blast Radius</div>
+                    <div className="rp-metric-value">
+                      {Number(actionInfo.weighted_blast_radius).toFixed(3)}
+                    </div>
+                  </div>
+                  <div className="rp-metric-item">
+                    <div className="rp-metric-label">Systemic Risk</div>
+                    <div className={`rp-metric-value ${actionInfo.systemic_risk > 0.7 ? 'high-risk' : actionInfo.systemic_risk > 0.3 ? 'medium-risk' : 'low-risk'}`}>
+                      {Number(actionInfo.systemic_risk).toFixed(3)}
+                    </div>
+                  </div>
+                  <div className="rp-metric-item">
+                    <div className="rp-metric-label">Weighted Systemic Risk</div>
+                    <div className={`rp-metric-value ${actionInfo.weighted_systemic_risk > 0.7 ? 'high-risk' : actionInfo.weighted_systemic_risk > 0.3 ? 'medium-risk' : 'low-risk'}`}>
+                      {Number(actionInfo.weighted_systemic_risk).toFixed(3)}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="rp-section">
@@ -316,23 +405,23 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
                 <div key={index} className="rp-message-item">
                   <div className="rp-message-type">{message.type}</div>
                   <div className="rp-message-content">
-                    {message.content || (message.type === 'ai' && 
-                      (message.tool_calls?.length > 0 || message.additional_kwargs?.tool_calls?.length > 0)
-                      ? `Calling tool: ${message.tool_calls?.[0]?.name || message.additional_kwargs?.tool_calls?.[0]?.function?.name}`
-                      : message.content)
+                    {message.content ? renderContent(message.content) : (message.type === 'ai' && 
+                      ((message.tool_calls && message.tool_calls.length > 0) || (message.additional_kwargs?.tool_calls && message.additional_kwargs.tool_calls.length > 0))
+                      ? `Calling tool: ${message.tool_calls?.[0]?.name || message.additional_kwargs?.tool_calls?.[0]?.function?.name || 'Unknown Tool'}`
+                      : renderContent(message.content))
                     }
                   </div>
-                  {(message.tool_calls || message.additional_kwargs?.tool_calls) && (
+                  {((message.tool_calls && message.tool_calls.length > 0) || (message.additional_kwargs?.tool_calls && message.additional_kwargs.tool_calls.length > 0)) && (
                     <div className="rp-tool-calls">
-                      {(message.tool_calls || message.additional_kwargs?.tool_calls)?.map((call, idx) => {
+                      {(message.tool_calls || message.additional_kwargs?.tool_calls || []).map((call: ToolCall, idx: number) => {
                         // Get tool name and args based on message type
-                        const toolName = call?.name || call?.function?.name;
-                        const toolArgs = call?.args || call?.function?.arguments;
+                        const toolName = call?.name || call?.function?.name || 'Unknown Tool';
+                        const toolArgs = call?.args || call?.function?.arguments || {};
                         
                         return (
                           <div key={idx} className="rp-tool-call">
                             <span className="rp-tool-name">{toolName}</span>
-                            {toolArgs && Object.keys(toolArgs).length > 0 && (
+                            {Object.keys(toolArgs).length > 0 && (
                               <pre className="rp-tool-args">
                                 {JSON.stringify(toolArgs, null, 2)}
                               </pre>
@@ -350,25 +439,26 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
 
             <div className="rp-label">Output Message:</div>
             <div className="rp-box" style={{ minHeight: 100 }}>
-              {actionInfo.output.generations[0]?.[0]?.message && (
+              {actionInfo.output.generations?.[0]?.[0]?.message && (
                 <div className="rp-message-item">
                   <div className="rp-message-content">
-                    {actionInfo.output.generations[0][0].message.content || 
-                     (actionInfo.output.generations[0][0].message.additional_kwargs?.tool_calls?.length > 0
-                      ? `Calling tool: ${actionInfo.output.generations[0][0].message.additional_kwargs.tool_calls[0]?.function?.name}`
-                      : actionInfo.output.generations[0][0].message.content)
+                    {actionInfo.output.generations[0][0].message.content ? 
+                      renderContent(actionInfo.output.generations[0][0].message.content) : 
+                     (actionInfo.output.generations[0][0].message.additional_kwargs?.tool_calls?.length
+                      ? `Calling tool: ${actionInfo.output.generations[0][0].message.additional_kwargs.tool_calls[0]?.function?.name || 'Unknown Tool'}`
+                      : renderContent(actionInfo.output.generations[0][0].message.content))
                     }
                   </div>
-                  {actionInfo.output.generations[0][0].message.additional_kwargs?.tool_calls && (
+                  {actionInfo.output.generations[0][0].message.additional_kwargs?.tool_calls?.length && (
                     <div className="rp-tool-calls">
-                      {actionInfo.output.generations[0][0].message.additional_kwargs?.tool_calls?.map((call: any, idx: number) => {
-                        const toolName = call?.function?.name;
-                        const toolArgs = call?.function?.arguments;
+                      {actionInfo.output.generations[0][0].message.additional_kwargs.tool_calls.map((call: ToolCall, idx: number) => {
+                        const toolName = call?.function?.name || 'Unknown Tool';
+                        const toolArgs = call?.function?.arguments || {};
                         
                         return (
                           <div key={idx} className="rp-tool-call">
                             <span className="rp-tool-name">{toolName}</span>
-                            {toolArgs && Object.keys(toolArgs).length > 0 && (
+                            {Object.keys(toolArgs).length > 0 && (
                               <pre className="rp-tool-args">
                                 {JSON.stringify(toolArgs, null, 2)}
                               </pre>
@@ -388,29 +478,32 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
       {agentInfo && (
         <>
           <div className="rp-section">
-            <div className="rp-label">Name:</div>
-            <div className="rp-value">{agentInfo.name}</div>
-            <div className="rp-label">Model:</div>
-            <div className="rp-value">{agentInfo.model}</div>
-            <div className="rp-label">Risk Score:</div>
-            <div className="rp-value">{(agentInfo.risk * 100).toFixed(2)}%</div>
-          </div>
-
-          <div className="rp-section">
-            <div className="rp-label">Backstory:</div>
-            <div className="rp-box" style={{ minHeight: 100 }}>
-              <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                {agentInfo.backstory}
-              </pre>
+            <div className="rp-header-info">
+              <div className="rp-header-main">
+                <div className="rp-label">Agent Name:</div>
+                <div className="rp-value">{agentInfo.name}</div>
+              </div>
+              <div className="rp-header-stats">
+                <div className="rp-stat">
+                  <div className="rp-stat-label">Model:</div>
+                  <div className="rp-stat-value">{agentInfo.model}</div>
+                </div>
+                <div className="rp-stat">
+                  <div className="rp-stat-label">Risk Score:</div>
+                  <div className={`rp-stat-value ${agentInfo.risk > 0.7 ? 'high-risk' : agentInfo.risk > 0.3 ? 'medium-risk' : 'low-risk'}`}>
+                    {Number(agentInfo.risk).toFixed(3)}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
           <div className="rp-section">
-            <div className="rp-label">Goal:</div>
-            <div className="rp-box" style={{ minHeight: 100 }}>
-              <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                {agentInfo.goal}
-              </pre>
+            <div className="rp-content-box">
+              <div className="rp-content-header">System Prompt</div>
+              <div className="rp-content-body">
+                <pre>{agentInfo.system_prompt}</pre>
+              </div>
             </div>
           </div>
         </>
@@ -418,37 +511,54 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
 
       {memoryInfo && (
         <div className="rp-section">
-          <div className="rp-label">Memory Content:</div>
-          <div className="rp-box" style={{ minHeight: 100 }}>
-            <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-              {memoryInfo.memory_content}
-            </pre>
+          <div className="rp-header-info">
+            <div className="rp-header-main">
+              <div className="rp-label">Memory Index:</div>
+              <div className="rp-value">{memoryInfo.memory_index}</div>
+            </div>
+            <div className="rp-header-stats">
+              <div className="rp-stat">
+                <div className="rp-stat-label">Risk Score:</div>
+                <div className={`rp-stat-value ${memoryInfo.risk > 0.7 ? 'high-risk' : memoryInfo.risk > 0.3 ? 'medium-risk' : 'low-risk'}`}>
+                  {Number(memoryInfo.risk).toFixed(3)}
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="rp-label">Memory Index:</div>
-          <div className="rp-value">{memoryInfo.memory_index}</div>
-          <div className="rp-label">Risk Score:</div>
-          <div className="rp-value">{(memoryInfo.risk * 100).toFixed(2)}%</div>
+
+          <div className="rp-content-box">
+            <div className="rp-content-header">Memory Content</div>
+            <div className="rp-content-body">
+              <pre>{memoryInfo.memory_content}</pre>
+            </div>
+          </div>
         </div>
       )}
 
       {toolInfo && (
-        <>
-          <div className="rp-section">
-            <div className="rp-label">Name:</div>
-            <div className="rp-value">{toolInfo.tool_name}</div>
-            <div className="rp-label">Risk Score:</div>
-            <div className="rp-value">{(toolInfo.risk * 100).toFixed(2)}%</div>
-          </div>
-
-          <div className="rp-section">
-            <div className="rp-label">Description:</div>
-            <div className="rp-box" style={{ minHeight: 100 }}>
-              <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
-                {toolInfo.description}
-              </pre>
+        <div className="rp-section">
+          <div className="rp-header-info">
+            <div className="rp-header-main">
+              <div className="rp-label">Tool Name:</div>
+              <div className="rp-value">{toolInfo.tool_name}</div>
+            </div>
+            <div className="rp-header-stats">
+              <div className="rp-stat">
+                <div className="rp-stat-label">Risk Score:</div>
+                <div className={`rp-stat-value ${toolInfo.risk > 0.7 ? 'high-risk' : toolInfo.risk > 0.3 ? 'medium-risk' : 'low-risk'}`}>
+                  {Number(toolInfo.risk).toFixed(3)}
+                </div>
+              </div>
             </div>
           </div>
-        </>
+
+          <div className="rp-content-box">
+            <div className="rp-content-header">Description</div>
+            <div className="rp-content-body">
+              <pre>{toolInfo.description}</pre>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

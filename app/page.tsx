@@ -89,6 +89,7 @@ function Flow() {
         // Combine nodes and edges from both component and action
         const actionNodes = data.action.nodes.map((node: Node<Record<string, unknown>, string>) => ({
           ...node,
+          isHighlighted: highlightedComponents.includes(node.id),
           style: {
             ...node.style,
             opacity: selectedNode != null ? (((node.id) === selectedNode.id) ? 1 : 0.3) : 1,
@@ -98,6 +99,7 @@ function Flow() {
 
         const componentNodes = data.component.nodes.map((node: Node<Record<string, unknown>, string>) => ({
           ...node,
+          isHighlighted: highlightedComponents.includes(node.id),
           style: {
             ...node.style,
             opacity: highlightedComponents.length > 0 ? (highlightedComponents.includes(node.id) ? 1 : 0.1) : 1,
@@ -155,6 +157,7 @@ function Flow() {
         // Update action nodes with opacity changes
         setActionNodes(nodes => nodes.map(node => ({
           ...node,
+          isHighlighted: highlightedComponents.includes(node.id),
           style: {
             ...node.style,
             opacity: selectedNode ? (activeNodeIds.has(node.id) ? 1 : 0.3) : 1,
@@ -182,7 +185,7 @@ function Flow() {
     };
 
     loadInitialData();
-  }, [selectedNode]);
+  }, [selectedNode, highlightedComponents]);
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -190,6 +193,7 @@ function Flow() {
 
         const componentNodes_ = componentNodes.map(node => ({
           ...node,
+          isHighlighted: highlightedComponents.includes(node.id),
           style: {
             ...node.style,
             opacity: highlightedComponents.length > 0 ? (highlightedComponents.includes(node.id) ? 1 : 0.1) : 1,
@@ -234,7 +238,25 @@ function Flow() {
       }
       setSelectedNode(node);
     } else if (node.type === 'agent_node') {
-      setHighlightedComponents([]);
+      // Find all components connected to this agent
+      const agentId = node.id;
+      const connectedComponents: string[] = [agentId]; // Include the agent itself
+      
+      // Find connected tools and memories via component edges
+      componentEdges.forEach(edge => {
+        if (edge.source === agentId) {
+          connectedComponents.push(edge.target);
+        }
+      });
+      
+      // Find action nodes that use this agent
+      actionNodes.forEach(actionNode => {
+        if (actionNode.data && actionNode.data.agent_id === agentId) {
+          connectedComponents.push(actionNode.id);
+        }
+      });
+      
+      setHighlightedComponents(connectedComponents);
       setSelectedNode(node);
     } else if (node.type === 'memory_node') {
       setHighlightedComponents([]);
@@ -247,7 +269,7 @@ function Flow() {
       setHighlightedComponents([]);
       setSelectedNode(null);
     }
-  }, [showInputComponents]);
+  }, [showInputComponents, componentEdges, actionNodes]);
 
   const onEdgeClick = useCallback((event: React.MouseEvent) => {
     // Don't dehighlight if clicking on the toggle button
@@ -348,7 +370,7 @@ function Flow() {
                   e.currentTarget.style.backgroundColor = showInputComponents ? '#007bff' : '#ffc107';
                 }}
               >
-                {showInputComponents ? 'Input Components' : 'Output Components'}
+                {showInputComponents ? 'Showing Action Input Components' : 'Showing Action Output Components'}
               </button>
             </Panel>
           </ReactFlow>

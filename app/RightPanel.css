@@ -61,6 +61,13 @@
   font-size: 0.8rem;
 }
 
+/* Special styling for agent name */
+.rp-header-main .rp-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin: 4px 0;
+}
+
 .rp-box {
   border: 2px solid #0000ff;
   border-radius: 2px;
@@ -169,4 +176,166 @@
   font-weight: 500;
   font-size: 0.8rem;
   margin-bottom: 4px;
+}
+
+/* New styles for agent node display */
+.rp-header-info {
+  background: #f8f8ff;
+  border: 2px solid #0000ff;
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+
+.rp-header-main {
+  margin-bottom: 12px;
+}
+
+.rp-header-stats {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rp-stat {
+  flex: 1;
+  background: white;
+  padding: 8px;
+  border: 1px solid #0000ff;
+  border-radius: 4px;
+}
+
+.rp-stat-label {
+  color: #0000ff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.rp-stat-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.rp-stat-value.high-risk {
+  color: #ff3b30;
+}
+
+.rp-stat-value.medium-risk {
+  color: #ff9500;
+}
+
+.rp-stat-value.low-risk {
+  color: #34c759;
+}
+
+.rp-content-box {
+  border: 2px solid #0000ff;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.rp-content-header {
+  background: #0000ff;
+  color: white;
+  padding: 8px 12px;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+.rp-content-body {
+  background: #f8f8ff;
+  padding: 12px;
+}
+
+.rp-content-body pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font-size: 0.8rem;
+  color: #333;
+  font-family: inherit;
+}
+
+.rp-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  padding: 8px;
+}
+
+.rp-metric-item {
+  background: white;
+  border: 1px solid #0000ff;
+  border-radius: 4px;
+  padding: 8px 12px;
+}
+
+.rp-metric-label {
+  color: #0000ff;
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.rp-metric-value {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.rp-metric-value.high-risk {
+  color: #ff3b30;
+}
+
+.rp-metric-value.medium-risk {
+  color: #ff9500;
+}
+
+.rp-metric-value.low-risk {
+  color: #34c759;
+}
+
+/* Loading state */
+.rp-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  color: #0000ff;
+  font-size: 0.9rem;
+}
+
+.rp-loading-spinner {
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #0000ff;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  animation: spin 1s linear infinite;
+  margin-right: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error state */
+.rp-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 20px;
+  text-align: center;
+  color: #ff3b30;
+  font-size: 0.9rem;
+}
+
+.rp-error-icon {
+  font-size: 24px;
+  margin-bottom: 12px;
 }
