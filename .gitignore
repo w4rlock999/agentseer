@@ -138,3 +138,6 @@ dist
 */.venv/
 
 */__pycache__/
+
+*/.DS_Store
+jailbreak_eval/data/.DS_Store

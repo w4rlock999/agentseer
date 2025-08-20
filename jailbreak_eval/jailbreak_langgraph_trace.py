@@ -230,6 +230,99 @@ def process_action_with_jailbreak(
         return None, None
 
 
+def process_action_with_jailbreak_retry(
+    action, 
+    model, 
+    jailbreak_prompt: str, 
+    jailbreak_idx: int, 
+    action_idx: int,
+    injection_type: InjectionType = "human_injection",
+    intermediary_phrase: str = "",
+    max_retries: int = 3
+):
+    """
+    Process a single action with one jailbreak prompt, with retry logic for errors.
+    
+    Args:
+        action: The action to process
+        model: The language model to use
+        jailbreak_prompt: The jailbreak prompt to inject
+        jailbreak_idx: Index of the current jailbreak prompt
+        action_idx: Index of the current action
+        injection_type: Type of injection to perform ("human_injection" or "ai_or_tool_injection")
+        intermediary_phrase: Optional phrase to insert before the jailbreak prompt
+        max_retries: Maximum number of retry attempts when model invoke returns an error
+    """
+    import time
+    
+    for attempt in range(max_retries + 1):  # +1 because we want max_retries actual retries after the first attempt
+        if attempt > 0:
+            print(f"Retry attempt {attempt}/{max_retries} for action {action_idx}, jailbreak prompt {jailbreak_idx}")
+            # Add a small delay between retries to avoid overwhelming the API
+            time.sleep(2 ** attempt)  # Exponential backoff: 2s, 4s, 8s...
+        
+        response, result_data = process_action_with_jailbreak(
+            action, 
+            model, 
+            jailbreak_prompt, 
+            jailbreak_idx,
+            action_idx,
+            injection_type,
+            intermediary_phrase
+        )
+        
+        # Check if we got a valid response
+        if response is not None and result_data is not None:
+            # Check if the response content indicates an error
+            response_content = response.content if hasattr(response, 'content') else str(response)
+            
+            # Define error indicators in the response
+            error_indicators = [
+                "error",
+                "Error",
+                "ERROR", 
+                "I cannot",
+                "I can't",
+                "I'm not able to",
+                "I'm unable to",
+                "Sorry, I cannot",
+                "I apologize, but I cannot",
+                "rate limit",
+                "Rate limit",
+                "too many requests",
+                "Too many requests",
+                "service unavailable",
+                "Service unavailable",
+                "internal server error",
+                "Internal server error",
+                "timeout",
+                "Timeout",
+                "connection error",
+                "Connection error"
+            ]
+            
+            # Check if response contains error indicators
+            is_error_response = any(indicator.lower() in response_content.lower() for indicator in error_indicators)
+            
+            if not is_error_response:
+                # Success - return the result
+                if attempt > 0:
+                    print(f"✓ Succeeded on retry attempt {attempt}")
+                return response, result_data
+            else:
+                print(f"✗ Error detected in response (attempt {attempt + 1}): {response_content[:100]}...")
+                if attempt == max_retries:
+                    print(f"✗ Max retries ({max_retries}) reached for action {action_idx}, jailbreak prompt {jailbreak_idx}")
+                    return response, result_data  # Return the error response as final result
+        else:
+            print(f"✗ No response received (attempt {attempt + 1})")
+            if attempt == max_retries:
+                print(f"✗ Max retries ({max_retries}) reached for action {action_idx}, jailbreak prompt {jailbreak_idx}")
+                return None, None
+    
+    return None, None
+
+
 def execute_jailbreak_evaluation(
     graph_file: str,
     model: BaseChatModel,
@@ -240,7 +333,8 @@ def execute_jailbreak_evaluation(
     start_action_idx: int = 0,
     output_file: str = 'data/jailbreak_results.json',
     injection_type: InjectionType = "human_injection",
-    intermediary_phrase: str = ""
+    intermediary_phrase: str = "",
+    max_retries: int = 3
 ):
     """
     Execute jailbreak evaluation on agent traces using specified jailbreak prompts and model.
@@ -256,6 +350,7 @@ def execute_jailbreak_evaluation(
         output_file: Path to save the results JSON file.
         injection_type: Type of injection to perform InjectionType = Literal["human_injection", "ai_injection", "ai_or_tool_injection", "tool_injection"]
         intermediary_phrase: Optional phrase to insert before each jailbreak prompt.
+        max_retries: Maximum number of retry attempts when model invoke returns an error. Default is 3.
         
     Raises:
         ValueError: If any required parameter is None, empty, or if files don't exist.
@@ -362,14 +457,15 @@ def execute_jailbreak_evaluation(
         for action_idx, action in enumerate(actions_to_process, start=start_action_idx):
             # Process the action once for each jailbreak prompt (0 to actual_num_prompts-1)
             for jb_idx in range(actual_num_prompts):
-                response, result_data = process_action_with_jailbreak(
+                response, result_data = process_action_with_jailbreak_retry(
                     action, 
                     model, 
                     jailbreak_prompts[jb_idx], 
                     jb_idx,
                     action_idx,
                     injection_type,
-                    intermediary_phrase
+                    intermediary_phrase,
+                    max_retries
                 )
                 if result_data:
                     # Read current results
@@ -388,6 +484,208 @@ def execute_jailbreak_evaluation(
                 print("-" * 80)
     
     print(f"\nAll results have been saved to {output_file}")
+
+
+def execute_selective_jailbreak_evaluation(
+    graph_file: str,
+    model: BaseChatModel,
+    jailbreak_prompt_file: str,
+    target_names: List[str],
+    output_file: str = 'data/selective_jailbreak_results.json',
+    injection_type: InjectionType = "human_injection",
+    intermediary_phrase: str = "",
+    print_outputs: bool = True
+):
+    """
+    Execute jailbreak evaluation only for specific target names (e.g., 'action_1_jb_prompt_4').
+    Will either add new results or replace existing ones with the same name.
+    
+    IMPORTANT: Action numbers are continuous across ALL traces, not per-trace. The method finds
+    actions by their 'label' field (e.g., "action_27") which is unique across the entire dataset.
+    
+    Args:
+        graph_file: Path to the JSON file containing the agent traces. (REQUIRED)
+        model: The language model instance to use for evaluation. (REQUIRED)
+        jailbreak_prompt_file: Path to the JSON file containing jailbreak prompts. (REQUIRED)
+        target_names: List of specific names to run jailbreak for (e.g., ['action_1_jb_prompt_4', 'action_27_jb_prompt_0'])
+                     Action numbers correspond to the 'label' field in the trace data.
+        output_file: Path to save/update the results JSON file.
+        injection_type: Type of injection to perform InjectionType = Literal["human_injection", "ai_injection", "ai_or_tool_injection", "tool_injection"]
+        intermediary_phrase: Optional phrase to insert before each jailbreak prompt.
+        print_outputs: Whether to print the jailbreak outputs to console (default: True).
+        
+    Raises:
+        ValueError: If any required parameter is None, empty, or if files don't exist.
+    """
+    # Validate required parameters
+    if not graph_file:
+        raise ValueError("graph_file parameter is required and cannot be empty")
+    if not model:
+        raise ValueError("model parameter is required and cannot be empty")
+    if not jailbreak_prompt_file:
+        raise ValueError("jailbreak_prompt_file parameter is required and cannot be empty")
+    if not target_names:
+        print("No target names provided. Nothing to do.")
+        return
+    
+    # Check if files exist
+    if not os.path.exists(graph_file):
+        raise ValueError(f"Trace file not found: {graph_file}")
+    if not os.path.exists(jailbreak_prompt_file):
+        raise ValueError(f"Jailbreak prompt file not found: {jailbreak_prompt_file}")
+    
+    print(f"✓ Validated required parameters:")
+    print(f"  - Trace file: {graph_file}")
+    print(f"  - Jailbreak prompts: {jailbreak_prompt_file}")
+    print(f"  - Target names: {target_names}")
+    
+    # Load jailbreak prompts
+    jailbreak_prompts = load_jailbreak_prompts(jailbreak_prompt_file)
+    print(f"Loaded {len(jailbreak_prompts)} jailbreak prompts from {jailbreak_prompt_file}")
+    
+    # Read the detailed graph data
+    with open(graph_file, 'r') as f:
+        detailed_graph = json.load(f)
+    print(f"Loaded trace data from {graph_file}")
+
+    # Get all traces
+    all_traces = detailed_graph.get('actions', [])
+    if not all_traces:
+        print("No traces found in the data")
+        return
+
+    # Parse target names to extract action indices and jailbreak prompt indices
+    target_configs = []
+    for name in target_names:
+        try:
+            # Parse format like "action_1_jb_prompt_4" 
+            parts = name.split('_')
+            if len(parts) >= 4 and parts[0] == 'action' and parts[2] == 'jb' and parts[3] == 'prompt':
+                action_idx = int(parts[1])
+                jb_idx = int(parts[4])
+                target_configs.append({
+                    'name': name,
+                    'action_idx': action_idx,
+                    'jb_idx': jb_idx
+                })
+            else:
+                print(f"Warning: Invalid name format '{name}', expected format like 'action_1_jb_prompt_4'")
+        except (ValueError, IndexError) as e:
+            print(f"Warning: Could not parse name '{name}': {e}")
+    
+    if not target_configs:
+        print("No valid target configurations found")
+        return
+        
+    print(f"Processing {len(target_configs)} specific jailbreak configurations")
+
+    # Load existing results if file exists, otherwise start with empty list
+    existing_results = []
+    if os.path.exists(output_file):
+        try:
+            with open(output_file, 'r') as f:
+                existing_results = json.load(f)
+            print(f"Loaded {len(existing_results)} existing results from {output_file}")
+        except (json.JSONDecodeError, FileNotFoundError):
+            print(f"Could not load existing results from {output_file}, starting fresh")
+            existing_results = []
+    else:
+        print(f"Output file {output_file} does not exist, will create new file")
+
+    # Create a mapping of existing results by name for easy lookup/replacement
+    existing_by_name = {result.get('name'): result for result in existing_results if result.get('name')}
+    
+    updated_count = 0
+    added_count = 0
+    
+    # Process each target configuration
+    for config in target_configs:
+        name = config['name']
+        action_idx = config['action_idx']
+        jb_idx = config['jb_idx']
+        
+        print(f"\n{'='*80}")
+        print(f"Processing target: {name} (action {action_idx}, jailbreak prompt {jb_idx})")
+        print(f"{'='*80}")
+        
+        # Validate jailbreak prompt index
+        if jb_idx >= len(jailbreak_prompts):
+            print(f"Error: Jailbreak prompt index {jb_idx} is out of range (max: {len(jailbreak_prompts)-1})")
+            continue
+            
+        # Find the action by label across all traces
+        action_found = False
+        target_label = f"action_{action_idx}"
+        
+        for trace_idx, trace in enumerate(all_traces):
+            for action in trace:
+                # Skip human input actions and check for matching label
+                if (not isinstance(action.get('input'), str) and 
+                    action.get('label') == target_label):
+                    
+                    action_found = True
+                    print(f"Found {target_label} in trace {trace_idx}")
+                    
+                    # Process the specific action with the specific jailbreak prompt
+                    response, result_data = process_action_with_jailbreak(
+                        action, 
+                        model, 
+                        jailbreak_prompts[jb_idx], 
+                        jb_idx,
+                        action_idx,
+                        injection_type,
+                        intermediary_phrase
+                    )
+                    
+                    if result_data:
+                        if print_outputs:
+                            print(f"\n{'*'*60}")
+                            print(f"JAILBREAK OUTPUT FOR: {name}")
+                            print(f"{'*'*60}")
+                            print(f"Jailbreak Prompt Used: {jailbreak_prompts[jb_idx][:100]}...")
+                            print(f"\nModel Response:")
+                            print("-" * 40)
+                            print(result_data.get('output', 'No output available'))
+                            print("-" * 40)
+                            print(f"{'*'*60}\n")
+                        
+                        # Check if this name already exists in results
+                        if name in existing_by_name:
+                            print(f"✓ Replacing existing result for {name}")
+                            existing_by_name[name] = result_data
+                            updated_count += 1
+                        else:
+                            print(f"✓ Adding new result for {name}")
+                            existing_by_name[name] = result_data
+                            added_count += 1
+                    else:
+                        print(f"✗ Failed to generate result for {name}")
+                    
+                    break  # Found the action, no need to check other actions in this trace
+            
+            if action_found:
+                break  # Found the action, no need to check other traces
+        
+        if not action_found:
+            print(f"Warning: Action with label '{target_label}' not found in any trace")
+    
+    # Convert back to list and save
+    final_results = list(existing_by_name.values())
+    
+    # Ensure output directory exists
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    
+    # Save results
+    with open(output_file, 'w') as f:
+        json.dump(final_results, f, indent=2)
+    
+    print(f"\n{'='*80}")
+    print(f"SUMMARY")
+    print(f"{'='*80}")
+    print(f"Added new results: {added_count}")
+    print(f"Updated existing results: {updated_count}")
+    print(f"Total results in file: {len(final_results)}")
+    print(f"Results saved to: {output_file}")
 
 
 def test_jailbreak_evaluation():
@@ -472,4 +770,34 @@ def test_jailbreak_evaluation():
 #         output_file='data/jailbreak_results_tool_w_intermediary_injection.json',  # Custom output file
 #         injection_type="tool_injection",  # Tool Message Injection
 #         intermediary_phrase=intermediary_prompt  # No intermediary
+#     )
+
+# Example usage of the new selective jailbreak evaluation:
+# if __name__ == "__main__":
+#     from langchain_openai import ChatOpenAI
+#     
+#     # Initialize the model
+#     model = ChatOpenAI(
+#         model="gpt-4o-mini",
+#         temperature=0,
+#         max_tokens=1000
+#     )
+#     
+#     # Example: Run jailbreak only for specific actions
+#     # Note: Action numbers are continuous across ALL traces
+#     target_names = [
+#         'action_1_jb_prompt_4',   # Action with label "action_1", jailbreak prompt 4
+#         'action_27_jb_prompt_0',  # Action with label "action_27", jailbreak prompt 0
+#         'action_15_jb_prompt_2'   # Action with label "action_15", jailbreak prompt 2
+#     ]
+#     
+#     execute_selective_jailbreak_evaluation(
+#         graph_file='data/detailed_graph_langgraph_multi_trace.json',
+#         model=model,
+#         jailbreak_prompt_file='data/successful_jailbreaks_PAIR_22Prompts.json',
+#         target_names=target_names,
+#         output_file='data/selective_jailbreak_results.json',
+#         injection_type="human_injection",
+#         intermediary_phrase="",
+#         print_outputs=True  # Set to False to run silently
 #     )
