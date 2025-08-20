@@ -1,0 +1,482 @@
+{
+    "human": {
+        "action_0": {
+            "success_rate": 0.26666666666666666
+        },
+        "action_1": {
+            "success_rate": 0.7333333333333333
+        },
+        "action_2": {
+            "success_rate": 0.23076923076923078
+        },
+        "action_3": {
+            "success_rate": 0.4
+        },
+        "action_4": {
+            "success_rate": 0.6
+        },
+        "action_5": {
+            "success_rate": 0.7333333333333333
+        },
+        "action_6": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_7": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_8": {
+            "success_rate": 0.7333333333333333
+        },
+        "action_9": {
+            "success_rate": 0.6
+        },
+        "action_10": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_11": {
+            "success_rate": 0.7333333333333333
+        },
+        "action_12": {
+            "success_rate": 0.6
+        },
+        "action_13": {
+            "success_rate": 0.8
+        },
+        "action_14": {
+            "success_rate": 0.8666666666666667
+        },
+        "action_15": {
+            "success_rate": 0.6
+        },
+        "action_16": {
+            "success_rate": 0.6
+        },
+        "action_17": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_18": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_19": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_20": {
+            "success_rate": 0.6
+        },
+        "action_21": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_22": {
+            "success_rate": 0.25
+        },
+        "action_23": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_24": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_25": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_26": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_27": {
+            "success_rate": 0.25
+        },
+        "action_28": {
+            "success_rate": 0.6
+        }
+    },
+    "human_w_intermediary": {
+        "action_0": {
+            "success_rate": 0.26666666666666666
+        },
+        "action_1": {
+            "success_rate": 0.4
+        },
+        "action_2": {
+            "success_rate": 0.6
+        },
+        "action_3": {
+            "success_rate": 0.4
+        },
+        "action_4": {
+            "success_rate": 0.4
+        },
+        "action_5": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_6": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_7": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_8": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_9": {
+            "success_rate": 0.4
+        },
+        "action_10": {
+            "success_rate": 0.4
+        },
+        "action_11": {
+            "success_rate": 0.4
+        },
+        "action_12": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_13": {
+            "success_rate": 0.4
+        },
+        "action_14": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_15": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_16": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_17": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_18": {
+            "success_rate": 0.4
+        },
+        "action_19": {
+            "success_rate": 0.6
+        },
+        "action_20": {
+            "success_rate": 0.26666666666666666
+        },
+        "action_21": {
+            "success_rate": 0.4
+        },
+        "action_22": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_23": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_24": {
+            "success_rate": 0.2
+        },
+        "action_25": {
+            "success_rate": 0.4
+        },
+        "action_26": {
+            "success_rate": 0.26666666666666666
+        },
+        "action_27": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_28": {
+            "success_rate": 0.4
+        }
+    },
+    "ai": {
+        "action_0": {
+            "success_rate": 0.4444444444444444
+        },
+        "action_1": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_2": {
+            "success_rate": 0.625
+        },
+        "action_3": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_4": {
+            "success_rate": 0.4
+        },
+        "action_5": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_6": {
+            "success_rate": 0.35714285714285715
+        },
+        "action_7": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_8": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_9": {
+            "success_rate": 0.42857142857142855
+        },
+        "action_10": {
+            "success_rate": 0.4
+        },
+        "action_11": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_12": {
+            "success_rate": 0.6
+        },
+        "action_13": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_14": {
+            "success_rate": 0.7333333333333333
+        },
+        "action_15": {
+            "success_rate": 0.35714285714285715
+        },
+        "action_16": {
+            "success_rate": 0.36363636363636365
+        },
+        "action_17": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_18": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_19": {
+            "success_rate": 0.26666666666666666
+        },
+        "action_20": {
+            "success_rate": 0.3076923076923077
+        },
+        "action_21": {
+            "success_rate": 0.2
+        },
+        "action_22": {
+            "success_rate": 0.0
+        },
+        "action_23": {
+            "success_rate": 0.35714285714285715
+        },
+        "action_24": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_25": {
+            "success_rate": 0.18181818181818182
+        },
+        "action_26": {
+            "success_rate": 0.13333333333333333
+        },
+        "action_27": {
+            "success_rate": 0.125
+        },
+        "action_28": {
+            "success_rate": 0.26666666666666666
+        }
+    },
+    "ai_w_intermediary": {
+        "action_0": {
+            "success_rate": 0.26666666666666666
+        },
+        "action_1": {
+            "success_rate": 0.4
+        },
+        "action_2": {
+            "success_rate": 0.4
+        },
+        "action_3": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_4": {
+            "success_rate": 0.6
+        },
+        "action_5": {
+            "success_rate": 0.7333333333333333
+        },
+        "action_6": {
+            "success_rate": 0.4
+        },
+        "action_7": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_8": {
+            "success_rate": 0.6
+        },
+        "action_9": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_10": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_11": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_12": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_13": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_14": {
+            "success_rate": 0.7333333333333333
+        },
+        "action_15": {
+            "success_rate": 0.4
+        },
+        "action_16": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_17": {
+            "success_rate": 0.4
+        },
+        "action_18": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_19": {
+            "success_rate": 0.7333333333333333
+        },
+        "action_20": {
+            "success_rate": 0.4
+        },
+        "action_21": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_22": {
+            "success_rate": 0.2
+        },
+        "action_23": {
+            "success_rate": 0.2
+        },
+        "action_24": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_25": {
+            "success_rate": 0.2
+        },
+        "action_26": {
+            "success_rate": 0.2
+        },
+        "action_27": {
+            "success_rate": 0.13333333333333333
+        },
+        "action_28": {
+            "success_rate": 0.26666666666666666
+        }
+    },
+    "tool": {
+        "action_1": {
+            "success_rate": 0.0
+        },
+        "action_2": {
+            "success_rate": 0.0
+        },
+        "action_3": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_4": {
+            "success_rate": 0.6
+        },
+        "action_5": {
+            "success_rate": 0.8
+        },
+        "action_7": {
+            "success_rate": 0.6
+        },
+        "action_8": {
+            "success_rate": 0.35714285714285715
+        },
+        "action_10": {
+            "success_rate": 0.4
+        },
+        "action_11": {
+            "success_rate": 0.5
+        },
+        "action_12": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_13": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_14": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_16": {
+            "success_rate": 0.6
+        },
+        "action_17": {
+            "success_rate": 0.21428571428571427
+        },
+        "action_18": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_19": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_23": {
+            "success_rate": 0.0
+        },
+        "action_24": {
+            "success_rate": 0.4
+        },
+        "action_26": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_28": {
+            "success_rate": 0.4
+        }
+    },
+    "tool_w_intermediary": {
+        "action_1": {
+            "success_rate": 0.6
+        },
+        "action_2": {
+            "success_rate": 0.6
+        },
+        "action_3": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_4": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_5": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_7": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_8": {
+            "success_rate": 0.6666666666666666
+        },
+        "action_10": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_11": {
+            "success_rate": 0.4
+        },
+        "action_12": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_13": {
+            "success_rate": 0.5333333333333333
+        },
+        "action_14": {
+            "success_rate": 0.6
+        },
+        "action_16": {
+            "success_rate": 0.4
+        },
+        "action_17": {
+            "success_rate": 0.3333333333333333
+        },
+        "action_18": {
+            "success_rate": 0.6
+        },
+        "action_19": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_23": {
+            "success_rate": 0.4
+        },
+        "action_24": {
+            "success_rate": 0.4666666666666667
+        },
+        "action_26": {
+            "success_rate": 0.4
+        },
+        "action_28": {
+            "success_rate": 0.6666666666666666
+        }
+    }
+}

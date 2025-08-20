@@ -178,10 +178,6 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
         try {
           const response = await fetch('/detailed_graph_langgraph_multi_trace.json');
           const data = await response.json();
-          // Get model info from reactflow graph
-          const graphResponse = await fetch('/reactflow_graph_with_multi_trace.json');
-          const graphData = await graphResponse.json();
-          const graphAgent = graphData?.component?.nodes?.find((n: any) => n?.id === selectedNode?.id);
           
           const agent = data?.components?.agents?.find((a: any) => a?.label === selectedNode?.id);
           if (agent) {
@@ -189,8 +185,8 @@ const RightPanel: React.FC<RightPanelProps> = ({ selectedNode, width, setWidth }
               id: agent.label,
               name: agent.name,
               system_prompt: agent.system_prompt,
-              model: graphAgent?.data?.model || 'Unknown Model',
-              risk: agent.risk || 0
+              model: selectedNode?.data?.model || 'Unknown Model',
+              risk: selectedNode?.data?.risk || 0
             });
           }
           setActionInfo(null);

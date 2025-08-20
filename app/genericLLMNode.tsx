@@ -37,7 +37,7 @@ const GenericLLMNode = ({ data, isConnectable, isHighlighted }: GenericLLMNodePr
           <div className="generic-llm-node-icon" />
           <span className="generic-llm-node-title">{data.label.toUpperCase()}</span>
         </div>
-        <div className="generic-llm-node-row">Model: gpt-4o-mini</div>
+        <div className="generic-llm-node-row">Model: {data.model}</div>
         <div className="generic-llm-node-row">Agent: {data.agent_name}</div>
         <div className={`generic-llm-node-row asr ${asrClass}`}>Jailbreak ASR: {asrValue}%</div>
       </div>

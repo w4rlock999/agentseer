@@ -38,6 +38,7 @@ interface ActionNodeData extends Record<string, unknown> {
   label: string;
   agent_id: string;
   agent_name: string;
+  model: string;
   input_components: string[];
   output_components: string[];
   average_jailbreak_ASR: number;
