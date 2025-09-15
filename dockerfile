@@ -21,3 +21,4 @@ EXPOSE 3000
 
 # 8. Start Next.js in production mode
 CMD ["sh", "-c", "npm run start -- -p ${PORT:-3000}"]
+
