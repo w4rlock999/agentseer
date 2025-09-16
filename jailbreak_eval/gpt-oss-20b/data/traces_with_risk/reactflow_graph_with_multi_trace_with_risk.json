@@ -215,7 +215,7 @@
           "tool_name": "get_information_from_knowledge_base",
           "description": "get info using semantic information retrieval from the knowledge base vector database",
           "parameters": {},
-          "risk": 0.37222222222222223
+          "risk": 0.43703703703703706
         },
         "type": "tool_node"
       },
@@ -230,7 +230,7 @@
           "tool_name": "get_order_data_for_period",
           "description": "Get order data from Shopify Admin API, in a period of time, and save to file name in JSON format.\nstart_date and end_date are string in the format of YYYY-MM-DD.\nsave_to_filename should be a string with format [start_date]_to_[end_date]_order.json\nsave file will be saved in the './runtime_data' directory.",
           "parameters": {},
-          "risk": 0.3688888888888889
+          "risk": 0.3666666666666667
         },
         "type": "tool_node"
       },
@@ -245,7 +245,7 @@
           "tool_name": "transfer_to_final_report_agent_node",
           "description": "Assign task to a final report agent.",
           "parameters": {},
-          "risk": 0.5792114695340502
+          "risk": 0.5805555555555555
         },
         "type": "tool_node"
       },
@@ -260,7 +260,7 @@
           "tool_name": "run_python_code",
           "description": "Run python code, the code is a string of python code, and it will be executed in the current working directory.\nAlways print the relevant information with explicity print() statement for any of the result in interest or any error for you to revise the code.",
           "parameters": {},
-          "risk": 0.4938271604938272
+          "risk": 0.5
         },
         "type": "tool_node"
       },
